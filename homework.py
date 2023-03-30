@@ -86,12 +86,12 @@ def check_response(response):
         message = ('В ответе API недостаточно ключей')
         raise KeyError(message)
 
-    homework = response.get('homeworks')
-    if not isinstance(homework, list):
+    homeworks = response.get('homeworks')
+    if not isinstance(homeworks, list):
         message = (f'Значение по ключу homeworks не является списком'
-                   f'тип значения ключа {type(homework)}')
+                   f'тип значения ключа {type(homeworks)}')
         raise TypeError(message)
-    return homework[0]
+    return homeworks
 
 
 def parse_status(homework):
@@ -111,7 +111,6 @@ def parse_status(homework):
         message = ('Вердикт по последней домашней'
                    'работе нестандартный или отсуствует')
         raise KeyError(message)
-
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
 
@@ -136,15 +135,16 @@ def main():
         try:
             api_answer = get_api_answer(timestamp)
             last_homework = check_response(api_answer)
-            homework_message = parse_status(last_homework)
-            if homework_message != prev_homework_message:
-                send_message(bot, homework_message)
-                prev_homework_message = homework_message
+            if not last_homework:
+                message = 'Нет домашки'
             else:
-                logger.debug('Статус последней домашней работы не изменился')
+                homework_message = parse_status(last_homework[0])
+            if prev_homework_message != homework_message:
+                send_message(bot, f'Новый статус домашки: {homework_message}')
+                prev_homework_message = homework_message
         except Exception as error:
-            logger.error(f'Сбой в работе программы: {error}')
             message = f'Сбой в работе программы: {error}'
+            logger.error(message)
             if message != last_message:
                 last_message = message
                 send_message(bot, message)

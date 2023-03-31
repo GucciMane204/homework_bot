@@ -136,7 +136,7 @@ def main():
             api_answer = get_api_answer(timestamp)
             last_homework = check_response(api_answer)
             if not last_homework:
-                message = 'Нет домашки'
+                homework_message = 'Нет домашки'
             else:
                 homework_message = parse_status(last_homework[0])
             if prev_homework_message != homework_message:
